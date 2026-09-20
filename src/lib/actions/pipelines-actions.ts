@@ -102,7 +102,7 @@ export async function getPipelinesAction() {
             probability: s.probability,
             color: s.color,
             isWon: s.isWon || s.name.toLowerCase() === "won",
-            isLost: s.lostReason ? true : (s.isLost || s.name.toLowerCase() === "lost"),
+            isLost: s.isLost || s.name.toLowerCase() === "lost",
             dealCount: s._count.deals,
           })),
         })),

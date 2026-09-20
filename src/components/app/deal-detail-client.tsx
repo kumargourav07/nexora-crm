@@ -1208,7 +1208,6 @@ export function DealDetailClient({ dealId }: DealDetailClientProps) {
         onSuccess={() => loadDeal()}
         initialLeadId={deal.leadId || undefined}
         initialContactId={deal.contactId || undefined}
-        initialCompanyId={deal.companyId || undefined}
         initialDealId={deal.id}
       />
 
@@ -1219,7 +1218,6 @@ export function DealDetailClient({ dealId }: DealDetailClientProps) {
         onSuccess={() => loadDeal()}
         initialLeadId={deal.leadId || undefined}
         initialContactId={deal.contactId || undefined}
-        initialCompanyId={deal.companyId || undefined}
         initialDealId={deal.id}
         initialRecipientEmail={deal.contact?.email || undefined}
       />
@@ -1230,8 +1228,6 @@ export function DealDetailClient({ dealId }: DealDetailClientProps) {
         onClose={() => setIsMeetingModalOpen(false)}
         onSuccess={() => loadDeal()}
         initialLeadId={deal.leadId || undefined}
-        initialContactId={deal.contactId || undefined}
-        initialCompanyId={deal.companyId || undefined}
         initialDealId={deal.id}
       />
 
@@ -1241,10 +1237,8 @@ export function DealDetailClient({ dealId }: DealDetailClientProps) {
         onClose={() => setIsWhatsAppModalOpen(false)}
         onSuccess={() => loadDeal()}
         initialLeadId={deal.leadId || undefined}
-        initialContactId={deal.contactId || undefined}
-        initialCompanyId={deal.companyId || undefined}
         initialDealId={deal.id}
-        initialRecipientPhone={deal.contact?.phone || undefined}
+        initialPhone={deal.contact?.phone || undefined}
       />
 
       {/* FollowUp Modal */}
@@ -1253,8 +1247,6 @@ export function DealDetailClient({ dealId }: DealDetailClientProps) {
         onClose={() => setIsFollowUpModalOpen(false)}
         onSuccess={() => loadDeal()}
         initialLeadId={deal.leadId || undefined}
-        initialContactId={deal.contactId || undefined}
-        initialCompanyId={deal.companyId || undefined}
         initialDealId={deal.id}
       />
     </div>

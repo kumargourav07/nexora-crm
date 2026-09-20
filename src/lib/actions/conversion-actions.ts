@@ -5,6 +5,8 @@ import { requirePermission } from "@/lib/auth/permissions";
 import { convertLeadSchema, ConvertLeadInput } from "@/lib/validations/sales";
 import { LeadStatus, DealStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { eventBus } from "@/lib/events/event-bus";
+import { WorkflowTriggerType } from "@/lib/validations/automations";
 
 /**
  * Executes atomic conversion of a Lead into Contact, Company, and Deal.
@@ -266,7 +268,7 @@ export async function convertLeadAction(input: ConvertLeadInput) {
             contactId: result.contactId,
             companyId: result.companyId,
           },
-          context: { source: "LEAD_CONVERSION" },
+          context: { source: "USER" },
         })
       );
     }
@@ -284,7 +286,7 @@ export async function convertLeadAction(input: ConvertLeadInput) {
           isConverted: true,
           convertedDealId: result.dealId,
         },
-        context: { source: "CONVERSION" },
+        context: { source: "USER" },
       })
     );
 

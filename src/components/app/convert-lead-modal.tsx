@@ -211,6 +211,8 @@ export function ConvertLeadModal({
               pipelineId: selectedPipelineId,
               stageId: selectedStageId,
               value: Number(dealValue) || 0,
+              currency: "INR" as const,
+              priority: "MEDIUM" as const,
               expectedCloseDate: expectedCloseDate || undefined,
               description: lead.notes || undefined,
             }

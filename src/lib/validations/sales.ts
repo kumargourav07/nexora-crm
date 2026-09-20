@@ -252,4 +252,4 @@ export const convertLeadSchema = z.object({
     .optional(),
 });
 
-export type ConvertLeadInput = z.infer<typeof convertLeadSchema>;
+export type ConvertLeadInput = z.input<typeof convertLeadSchema>;

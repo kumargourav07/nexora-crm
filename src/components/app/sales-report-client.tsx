@@ -22,6 +22,7 @@ import {
 import { getForecastMetricsAction, getSalesReportAction } from "@/lib/actions/forecast-actions";
 import { getPipelinesAction } from "@/lib/actions/pipelines-actions";
 import { getWorkspaceTeamAction } from "@/lib/actions/team-actions";
+import { LOST_REASON_LABELS } from "@/lib/validations/sales";
 
 export function SalesReportClient() {
   const [forecastData, setForecastData] = useState<any>(null);

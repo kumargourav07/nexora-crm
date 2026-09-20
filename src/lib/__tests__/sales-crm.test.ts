@@ -131,10 +131,10 @@ async function runTests() {
   // -------------------------------------------------------------
   console.log("\n--- 3. Lost Reasons & Deal Lifecycle Rules ---");
 
-  assert(LOST_REASONS.includes("Price"), "LOST_REASONS includes 'Price'");
-  assert(LOST_REASONS.includes("Competitor"), "LOST_REASONS includes 'Competitor'");
-  assert(LOST_REASONS.includes("No Response"), "LOST_REASONS includes 'No Response'");
-  assert(LOST_REASONS.includes("Timing"), "LOST_REASONS includes 'Timing'");
+  assert(LOST_REASONS.includes("PRICE"), "LOST_REASONS includes 'PRICE'");
+  assert(LOST_REASONS.includes("COMPETITOR"), "LOST_REASONS includes 'COMPETITOR'");
+  assert(LOST_REASONS.includes("NO_RESPONSE"), "LOST_REASONS includes 'NO_RESPONSE'");
+  assert(LOST_REASONS.includes("TIMING"), "LOST_REASONS includes 'TIMING'");
 
   // Verify status transitions
   const sampleDeal: {
@@ -167,9 +167,9 @@ async function runTests() {
   // Mark Lost
   sampleDeal.status = DealStatus.LOST;
   sampleDeal.lostAt = new Date();
-  sampleDeal.lostReason = "Price";
+  sampleDeal.lostReason = "PRICE";
   assert(
-    sampleDeal.status === DealStatus.LOST && sampleDeal.lostReason === "Price",
+    sampleDeal.status === DealStatus.LOST && sampleDeal.lostReason === "PRICE",
     "Mark Lost stores root-cause reason"
   );
 
