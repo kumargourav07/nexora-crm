@@ -1,0 +1,1095 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum LeadSource {
+  FACEBOOK
+  INDIAMART
+  NINETY_NINE_ACRES
+  HOUSING
+  GOOGLE_ADS
+  WEBSITE
+  WHATSAPP
+  OTHER
+}
+
+enum Department {
+  SALES
+  ENGINEERING
+  OPERATIONS
+  HR
+  FINANCE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  REMOTE
+  ON_LEAVE
+  HALF_DAY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  UPI
+  CARD
+  CHEQUE
+  OTHER
+}
+
+enum IntegrationProvider {
+  FACEBOOK
+  INDIAMART
+  NINETY_NINE_ACRES
+  HOUSING
+  GOOGLE_ADS
+  WEBSITE
+  WHATSAPP
+  CUSTOM_API
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+  PENDING
+  NOT_CONFIGURED
+}
+
+enum EventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum WorkflowTriggerType {
+  LEAD_CREATED
+  LEAD_UPDATED
+  LEAD_STATUS_CHANGED
+  LEAD_SOURCE_RECEIVED
+  CONTACT_CREATED
+  CONTACT_UPDATED
+  DEAL_CREATED
+  DEAL_STAGE_CHANGED
+  DEAL_WON
+  DEAL_LOST
+  INVOICE_CREATED
+  INVOICE_SENT
+  INVOICE_PAID
+  INVOICE_OVERDUE
+  PAYMENT_RECEIVED
+  TASK_CREATED
+  TASK_COMPLETED
+}
+
+enum WorkflowActionType {
+  ASSIGN_LEAD
+  UPDATE_LEAD_STATUS
+  UPDATE_LEAD_SOURCE
+  CREATE_TASK
+  ASSIGN_TASK
+  SEND_NOTIFICATION
+  CREATE_ACTIVITY
+  ADD_TAG
+  REMOVE_TAG
+  UPDATE_DEAL_STAGE
+  ASSIGN_DEAL
+  CREATE_INVOICE
+  SEND_INVOICE
+  DELAY
+}
+
+enum WorkflowExecutionStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum ConditionOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  GREATER_THAN
+  LESS_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
+  IS_EMPTY
+  IS_NOT_EMPTY
+}
+
+enum ConditionMatchGroup {
+  ALL
+  ANY
+}
+
+enum CommunicationType {
+  EMAIL
+  CALL
+  MEETING
+  WHATSAPP
+  SMS
+  NOTE
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CommunicationStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum CallOutcome {
+  CONNECTED
+  NO_ANSWER
+  BUSY
+  CALLBACK_REQUESTED
+  WRONG_NUMBER
+  OTHER
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum FollowUpStatus {
+  UPCOMING
+  OVERDUE
+  COMPLETED
+  CANCELLED
+}
+
+enum FollowUpType {
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  WHATSAPP
+  SMS
+  OTHER
+}
+
+enum EmailDeliveryStatus {
+  DRAFT
+  QUEUED
+  SENT
+  DELIVERED
+  OPENED
+  BOUNCED
+  FAILED
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  name                   String
+  email                  String                  @unique
+  passwordHash           String
+  avatarUrl              String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  memberships            Membership[]
+  ownedLeads             Lead[]
+  ownedContacts          Contact[]               @relation("ContactOwner")
+  ownedCompanies         Company[]               @relation("CompanyOwner")
+  ownedDeals             Deal[]                  @relation("DealOwner")
+  ownedInvoices          Invoice[]               @relation("InvoiceOwner")
+  paymentsRecorded       Payment[]               @relation("PaymentRecorder")
+  activities             Activity[]
+  notifications          Notification[]
+  notes                  Note[]
+  tasksAssigned          Task[]
+  invitationsSent        WorkspaceInvitation[]   @relation("UserInvitations")
+  auditLogs              AuditLog[]
+  notificationPreference NotificationPreference?
+  workflowsCreated       Workflow[]              @relation("WorkflowCreator")
+  communicationsOwned    Communication[]         @relation("CommunicationOwner")
+  followUpsOwned         FollowUp[]              @relation("FollowUpOwner")
+  templatesCreated       CommunicationTemplate[] @relation("TemplateCreator")
+
+  @@index([email])
+}
+
+model Workspace {
+  id                 String                 @id @default(cuid())
+  name               String
+  slug               String                 @unique
+  timezone           String                 @default("Asia/Kolkata")
+  currency           String                 @default("INR")
+  dateFormat         String                 @default("DD/MM/YYYY")
+  defaultLeadStatus  LeadStatus             @default(NEW)
+  defaultLeadOwnerId String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  memberships        Membership[]
+  leads              Lead[]
+  contacts           Contact[]
+  companies          Company[]
+  pipelines          Pipeline[]
+  pipelineStages     PipelineStage[]
+  deals              Deal[]
+  employees          Employee[]
+  invoices           Invoice[]
+  payments           Payment[]
+  integrations       Integration[]
+  integrationEvents  IntegrationEvent[]
+  externalIdentities LeadExternalIdentity[]
+  activities         Activity[]
+  notifications      Notification[]
+  notes              Note[]
+  tasks              Task[]
+  invitations        WorkspaceInvitation[]
+  auditLogs          AuditLog[]
+  workflows              Workflow[]
+  workflowExecutions     WorkflowExecution[]
+  communications         Communication[]
+  followUps              FollowUp[]
+  communicationTemplates CommunicationTemplate[]
+
+  @@index([slug])
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role      @default(MEMBER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model Company {
+  id          String     @id @default(cuid())
+  workspaceId String
+  name        String
+  website     String?
+  industry    String?
+  phone       String?
+  email       String?
+  address     String?
+  ownerId     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner       User?      @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  contacts    Contact[]
+  deals       Deal[]
+  invoices    Invoice[]
+  activities             Activity[]
+  tasks                  Task[]
+  notes                  Note[]
+  communications         Communication[]
+  followUps              FollowUp[]
+
+  @@index([workspaceId])
+  @@index([name])
+  @@index([ownerId])
+  @@index([workspaceId, name])
+}
+
+model Contact {
+  id          String     @id @default(cuid())
+  workspaceId String
+  firstName   String
+  lastName    String?
+  email       String?
+  phone       String?
+  jobTitle    String?
+  companyId   String?
+  ownerId     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  company     Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner       User?      @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  deals       Deal[]
+  invoices    Invoice[]
+  activities             Activity[]
+  tasks                  Task[]
+  notes                  Note[]
+  communications         Communication[]
+  followUps              FollowUp[]
+
+  @@index([workspaceId])
+  @@index([companyId])
+  @@index([ownerId])
+  @@index([email])
+  @@index([phone])
+  @@index([workspaceId, email])
+}
+
+model Pipeline {
+  id          String          @id @default(cuid())
+  workspaceId String
+  name        String
+  isDefault   Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stages      PipelineStage[]
+  deals       Deal[]
+
+  @@index([workspaceId])
+}
+
+model PipelineStage {
+  id          String     @id @default(cuid())
+  pipelineId  String
+  workspaceId String
+  name        String
+  order       Int
+  probability Int        @default(0)
+  color       String?
+  isWon       Boolean    @default(false)
+  isLost      Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  pipeline    Pipeline   @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deals       Deal[]
+
+  @@index([pipelineId])
+  @@index([workspaceId])
+  @@index([order])
+  @@index([pipelineId, order])
+}
+
+model Deal {
+  id                String         @id @default(cuid())
+  workspaceId       String
+  name              String
+  contactId         String?
+  companyId         String?
+  ownerId           String?
+  ownerName         String         @default("Alex Chen")
+  pipelineId        String
+  stageId           String
+  value             Decimal        @default(0) @db.Decimal(12, 2)
+  currency          String         @default("INR")
+  probability       Int            @default(10)
+  priority          TaskPriority   @default(MEDIUM)
+  expectedCloseDate DateTime?
+  status            DealStatus     @default(OPEN)
+  source            LeadSource     @default(WEBSITE)
+  description       String?        @db.Text
+  wonAt             DateTime?
+  wonById           String?
+  lostAt            DateTime?
+  lostById          String?
+  lostReason        String?
+  lossNotes         String?        @db.Text
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact           Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company           Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  owner             User?          @relation("DealOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  pipeline          Pipeline       @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stage             PipelineStage  @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  invoices          Invoice[]
+  activities        Activity[]
+  tasks             Task[]
+  notes             Note[]
+  communications    Communication[]
+  followUps         FollowUp[]
+
+  @@index([workspaceId])
+  @@index([pipelineId])
+  @@index([stageId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([priority])
+  @@index([expectedCloseDate])
+  @@index([workspaceId, status])
+  @@index([workspaceId, pipelineId])
+  @@index([workspaceId, expectedCloseDate])
+}
+
+model Lead {
+  id                 String                 @id @default(cuid())
+  workspaceId        String
+  name               String
+  company            String
+  email              String
+  phone              String
+  source             LeadSource             @default(WEBSITE)
+  status             LeadStatus             @default(NEW)
+  ownerId            String?
+  ownerName          String                 @default("Alex Chen")
+  value              Decimal                @default(0) @db.Decimal(12, 2)
+  tags               String                 @default("[]")
+  notes              String?
+  isConverted        Boolean                @default(false)
+  convertedAt        DateTime?
+  convertedContactId String?
+  convertedCompanyId String?
+  convertedDealId    String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  workspace          Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner              User?                  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  activities         Activity[]
+  notesList          Note[]
+  tasks                  Task[]
+  externalIdentities     LeadExternalIdentity[]
+  integrationEvents      IntegrationEvent[]
+  communications         Communication[]
+  followUps              FollowUp[]
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([source])
+  @@index([isConverted])
+  @@index([workspaceId, status])
+  @@index([workspaceId, isConverted])
+}
+
+model Employee {
+  id               String           @id @default(cuid())
+  workspaceId      String
+  name             String
+  email            String
+  phone            String
+  department       Department       @default(SALES)
+  role             String
+  status           EmployeeStatus   @default(ACTIVE)
+  attendance       AttendanceStatus @default(PRESENT)
+  location         String
+  joinDate         DateTime         @default(now())
+  leaveBalance     Int              @default(18)
+  dealsClosed      Int              @default(0)
+  revenueGenerated Decimal          @default(0) @db.Decimal(12, 2)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([department])
+  @@index([attendance])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  workspaceId     String
+  invoiceNumber   String
+  customerName    String
+  customerCompany String?
+  customerEmail   String
+  customerPhone   String?
+  customerAddress String?       @db.Text
+  customerGst     String?
+  placeOfSupply   String?
+  contactId       String?
+  companyId       String?
+  dealId          String?
+  ownerId         String?
+  ownerName       String        @default("Alex Chen")
+  status          InvoiceStatus @default(DRAFT)
+  issueDate       DateTime      @default(now())
+  dueDate         DateTime
+  currency        String        @default("INR")
+  subtotal        Decimal       @default(0) @db.Decimal(12, 2)
+  discount        Decimal       @default(0) @db.Decimal(12, 2)
+  discountType    String        @default("FIXED")
+  tax             Decimal       @default(0) @db.Decimal(12, 2)
+  taxRate         Decimal       @default(0) @db.Decimal(5, 2)
+  cgst            Decimal       @default(0) @db.Decimal(12, 2)
+  sgst            Decimal       @default(0) @db.Decimal(12, 2)
+  igst            Decimal       @default(0) @db.Decimal(12, 2)
+  total           Decimal       @default(0) @db.Decimal(12, 2)
+  amountPaid      Decimal       @default(0) @db.Decimal(12, 2)
+  balanceDue      Decimal       @default(0) @db.Decimal(12, 2)
+  notes           String?       @db.Text
+  terms           String?       @db.Text
+  sentAt          DateTime?
+  paidAt          DateTime?
+  cancelledAt     DateTime?
+  paymentMethod   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact         Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company         Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  deal            Deal?         @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  owner           User?         @relation("InvoiceOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  items           InvoiceItem[]
+  payments        Payment[]
+  activities      Activity[]
+  notesList              Note[]
+  tasks                  Task[]
+  communications         Communication[]
+
+  @@unique([workspaceId, invoiceNumber])
+  @@index([workspaceId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@index([dueDate])
+  @@index([issueDate])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([dealId])
+  @@index([ownerId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, invoiceNumber])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @default(0) @db.Decimal(12, 2)
+  taxRate     Decimal  @default(0) @db.Decimal(5, 2)
+  discount    Decimal  @default(0) @db.Decimal(12, 2)
+  amount      Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  invoiceId     String
+  amount        Decimal       @default(0) @db.Decimal(12, 2)
+  paymentDate   DateTime      @default(now())
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
+  reference     String?
+  notes         String?       @db.Text
+  recordedById  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  recordedBy    User?         @relation("PaymentRecorder", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([invoiceId])
+  @@index([paymentDate])
+  @@index([workspaceId, invoiceId])
+}
+
+model Integration {
+  id               String                 @id @default(cuid())
+  workspaceId      String
+  provider         IntegrationProvider
+  status           IntegrationStatus      @default(NOT_CONFIGURED)
+  config           String?                @db.Text
+  encryptedSecrets String?                @db.Text
+  webhookUrl       String?
+  webhookSecret    String?
+  defaultOwnerId   String?
+  defaultOwnerName String?                @default("Alex Chen")
+  lastError        String?
+  lastEventAt      DateTime?
+  leadsSyncedToday Int                    @default(0)
+  totalSynced      Int                    @default(0)
+  lastSync         DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  workspace        Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  events           IntegrationEvent[]
+  identities       LeadExternalIdentity[]
+
+  @@unique([workspaceId, provider])
+  @@index([workspaceId])
+}
+
+model IntegrationEvent {
+  id            String              @id @default(cuid())
+  workspaceId   String
+  integrationId String?
+  provider      IntegrationProvider
+  eventType     String              @default("lead_received")
+  externalId    String?
+  payload       String              @db.Text
+  status        EventStatus         @default(RECEIVED)
+  errorMessage  String?
+  leadId        String?
+  createdAt     DateTime            @default(now())
+  processedAt   DateTime?
+
+  workspace     Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  integration   Integration?        @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  lead          Lead?               @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([integrationId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model LeadExternalIdentity {
+  id            String              @id @default(cuid())
+  workspaceId   String
+  leadId        String
+  integrationId String?
+  provider      IntegrationProvider
+  externalId    String
+  metadata      String?             @db.Text
+  createdAt     DateTime            @default(now())
+
+  workspace     Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead          Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  integration   Integration?        @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, provider, externalId])
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([externalId])
+}
+
+model Activity {
+  id          String     @id @default(cuid())
+  workspaceId String
+  leadId      String?
+  dealId      String?
+  contactId   String?
+  companyId   String?
+  invoiceId   String?
+  userId      String?
+  type        String
+  title       String
+  description String
+  metadata    String?    @db.Text
+  author      String     @default("System")
+  createdAt   DateTime   @default(now())
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead        Lead?      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contact     Contact?   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company     Company?   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice     Invoice?   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model Note {
+  id          String     @id @default(cuid())
+  workspaceId String
+  leadId      String?
+  dealId      String?
+  contactId   String?
+  companyId   String?
+  invoiceId   String?
+  userId      String?
+  authorName  String     @default("User")
+  content     String     @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead        Lead?      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal        Deal?      @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contact     Contact?   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company     Company?   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice     Invoice?   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([createdAt])
+}
+
+model Task {
+  id             String        @id @default(cuid())
+  workspaceId    String
+  leadId         String?
+  dealId         String?
+  contactId      String?
+  companyId      String?
+  invoiceId      String?
+  assignedToId   String?
+  assignedToName String?
+  title          String
+  description    String?       @db.Text
+  dueDate        DateTime
+  priority       TaskPriority  @default(MEDIUM)
+  status         TaskStatus    @default(TODO)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead           Lead?         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal           Deal?         @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contact        Contact?      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company        Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice        Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  assignedTo     User?         @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, dueDate])
+}
+
+model Notification {
+  id          String     @id @default(cuid())
+  workspaceId String
+  userId      String?
+  title       String
+  description String
+  read        Boolean    @default(false)
+  type        String     @default("system")
+  link        String?
+  createdAt   DateTime   @default(now())
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model WorkspaceInvitation {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String
+  role        Role      @default(MEMBER)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  invitedById String
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation("UserInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    String?   @db.Text
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@index([entityType])
+  @@index([workspaceId, createdAt])
+}
+
+model NotificationPreference {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  taskNotifications        Boolean  @default(true)
+  leadNotifications        Boolean  @default(true)
+  invoiceNotifications     Boolean  @default(true)
+  integrationNotifications Boolean  @default(true)
+  statusNotifications      Boolean  @default(true)
+  emailDigest              Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Workflow {
+  id              String                @id @default(cuid())
+  workspaceId     String
+  name            String
+  description     String?
+  status          WorkflowStatus        @default(DRAFT)
+  triggerType     WorkflowTriggerType
+  triggerConfig   String?               @db.Text
+  conditionMatch  ConditionMatchGroup   @default(ALL)
+  conditions      String                @default("[]") @db.Text
+  actions         String                @default("[]") @db.Text
+  createdById     String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  workspace       Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy       User?                 @relation("WorkflowCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  executions      WorkflowExecution[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, triggerType])
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model WorkflowExecution {
+  id                    String                  @id @default(cuid())
+  workspaceId           String
+  workflowId            String
+  eventId               String?
+  idempotencyKey        String?
+  entityType            String
+  entityId              String?
+  status                WorkflowExecutionStatus @default(RUNNING)
+  startedAt             DateTime                @default(now())
+  completedAt           DateTime?
+  durationMs            Int?
+  errorMessage          String?                 @db.Text
+  configurationSnapshot String?                 @db.Text
+  stepResults           String?                 @db.Text
+  depth                 Int                     @default(1)
+  createdAt             DateTime                @default(now())
+
+  workspace             Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflow              Workflow                @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workflowId])
+  @@index([workflowId, status])
+  @@index([idempotencyKey])
+  @@index([createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model Communication {
+  id                 String                 @id @default(cuid())
+  workspaceId        String
+  type               CommunicationType
+  direction          CommunicationDirection @default(OUTBOUND)
+  status             CommunicationStatus    @default(COMPLETED)
+  subject            String?
+  content            String                 @db.Text
+  callOutcome        CallOutcome?
+  durationSeconds    Int?
+  meetingStart       DateTime?
+  meetingEnd         DateTime?
+  meetingLocation    String?
+  meetingLink        String?
+  meetingStatus      MeetingStatus?
+  leadId             String?
+  contactId          String?
+  companyId          String?
+  dealId             String?
+  invoiceId          String?
+  ownerId            String?
+  ownerName          String                 @default("User")
+  recipientEmail     String?
+  recipientPhone     String?
+  scheduledAt        DateTime?
+  completedAt        DateTime?
+  deliveryStatus     EmailDeliveryStatus?
+  externalMessageId  String?
+  metadata           String?                @db.Text
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  workspace          Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead               Lead?                  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  contact            Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company            Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  deal               Deal?                  @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  invoice            Invoice?               @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  owner              User?                  @relation("CommunicationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  followUps          FollowUp[]
+
+  @@index([workspaceId])
+  @@index([type])
+  @@index([status])
+  @@index([leadId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([dealId])
+  @@index([invoiceId])
+  @@index([ownerId])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@index([workspaceId, type])
+  @@index([workspaceId, createdAt])
+}
+
+model FollowUp {
+  id                 String                 @id @default(cuid())
+  workspaceId        String
+  type               FollowUpType           @default(CALL)
+  title              String
+  notes              String?                @db.Text
+  dueAt              DateTime
+  status             FollowUpStatus         @default(UPCOMING)
+  completedAt        DateTime?
+  outcome            String?
+  completionNotes    String?                @db.Text
+  leadId             String?
+  contactId          String?
+  companyId          String?
+  dealId             String?
+  communicationId    String?
+  ownerId            String?
+  ownerName          String                 @default("User")
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  workspace          Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead               Lead?                  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  contact            Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company            Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  deal               Deal?                  @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  communication      Communication?         @relation(fields: [communicationId], references: [id], onDelete: SetNull)
+  owner              User?                  @relation("FollowUpOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([type])
+  @@index([dueAt])
+  @@index([ownerId])
+  @@index([leadId])
+  @@index([contactId])
+  @@index([dealId])
+  @@index([createdAt])
+  @@index([workspaceId, status])
+  @@index([workspaceId, dueAt])
+}
+
+model CommunicationTemplate {
+  id                 String                 @id @default(cuid())
+  workspaceId        String
+  name               String
+  type               CommunicationType      @default(EMAIL)
+  subject            String?
+  body               String                 @db.Text
+  variables          String?                @db.Text
+  isActive           Boolean                @default(true)
+  createdById        String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  workspace          Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy          User?                  @relation("TemplateCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([type])
+  @@index([isActive])
+  @@index([createdAt])
+}

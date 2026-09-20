@@ -1,0 +1,75 @@
+export const DEMO_ANALYTICS_DATA = {
+  kpis: {
+    totalLeads: "12,482",
+    totalLeadsChange: "+12.4%",
+    qualifiedLeads: "4,280",
+    qualifiedLeadsChange: "+8.2%",
+    conversionRate: "32.8%",
+    conversionRateChange: "+4.6%",
+    totalRevenue: "₹84.2L",
+    totalRevenueChange: "+18.2%",
+  },
+  revenueByMonth: [
+    { month: "Jan", revenue: 42, label: "₹42L", leads: 1420 },
+    { month: "Feb", revenue: 56, label: "₹56L", leads: 1680 },
+    { month: "Mar", revenue: 64, label: "₹64L", leads: 1950 },
+    { month: "Apr", revenue: 71, label: "₹71L", leads: 2240 },
+    { month: "May", revenue: 79, label: "₹79L", leads: 2490 },
+    { month: "Jun", revenue: 84.2, label: "₹84.2L", leads: 2702 },
+  ],
+  leadSourceDistribution: [
+    { source: "Facebook Ads", percentage: 32, leads: 3994, color: "#3B82F6" },
+    { source: "IndiaMART", percentage: 28, leads: 3494, color: "#10B981" },
+    { source: "99acres", percentage: 18, leads: 2246, color: "#0EA5E9" },
+    { source: "Housing.com", percentage: 12, leads: 1497, color: "#F59E0B" },
+    { source: "Website & Direct", percentage: 10, leads: 1251, color: "#8B5CF6" },
+  ],
+  pipelineSummary: [
+    { stage: "New Leads", count: 482, value: "₹42.8L", color: "bg-blue-500" },
+    { stage: "Qualified", count: 216, value: "₹28.4L", color: "bg-indigo-500" },
+    { stage: "Proposal", count: 94, value: "₹18.6L", color: "bg-amber-500" },
+    { stage: "Negotiation", count: 48, value: "₹12.2L", color: "bg-sky-500" },
+    { stage: "Won", count: 32, value: "₹8.9L", color: "bg-emerald-500" },
+  ],
+  topPerformers: [
+    { name: "Alex Chen", role: "VP Sales", closedDeals: 42, revenue: "₹48.6L", avatar: "AC" },
+    { name: "Amit Verma", role: "Senior AE", closedDeals: 28, revenue: "₹24.8L", avatar: "AV" },
+    { name: "Neha Kapoor", role: "SDR Lead", closedDeals: 19, revenue: "₹16.2L", avatar: "NK" },
+    { name: "Rohan Das", role: "AE", closedDeals: 14, revenue: "₹11.4L", avatar: "RD" },
+  ],
+};
+
+export const DEMO_NOTIFICATIONS = [
+  {
+    id: "notif-1",
+    title: "New high-value lead captured",
+    description: "Rahul Sharma (Acme Realty) inquired via IndiaMART for ₹1.2L.",
+    time: "10m ago",
+    read: false,
+    type: "lead" as const,
+  },
+  {
+    id: "notif-2",
+    title: "Invoice payment verified",
+    description: "Invoice #INV-1048 (₹1.71L) marked as Paid via HDFC transfer.",
+    time: "25m ago",
+    read: false,
+    type: "invoice" as const,
+  },
+  {
+    id: "notif-3",
+    title: "Leave approval requested",
+    description: "Rajesh Kulkarni requested 2 days annual leave approval.",
+    time: "2h ago",
+    read: true,
+    type: "hr" as const,
+  },
+  {
+    id: "notif-4",
+    title: "Meta Lead Ads Synced",
+    description: "48 new leads synchronized with zero mapping errors today.",
+    time: "3h ago",
+    read: true,
+    type: "system" as const,
+  },
+];
